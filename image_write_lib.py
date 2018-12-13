@@ -45,6 +45,19 @@ def build_image_yellow(img_fname, image_x_size=512, image_y_size=512):
     create an image that is full yellow.
     Just yellow at every pixel
     """
+    my_image = Image.new('RGB', (512,512))
+    my_image_pixels = my_image.load()
+    image_x_size = my_image.size[0]
+    image_y_size = my_image.size[1]
+    for x in range(image_x_size):
+        for y in range(image_y_size):
+            pixel_color = (255, 255, 0)
+            my_image_pixels[x,y] = pixel_color
+    print(f'saving {img_fname}')
+    my_image.save(img_fname, 'png')
+
+
+
     pass
 
 def build_image_double_red_gradient(img_fname):
@@ -54,6 +67,19 @@ def build_image_double_red_gradient(img_fname):
     from left to right.  And when it reaches 255, start over at 0
     and start another gradient from 0 to 255.
     """
+    my_image = Image.new('RGB', (512,512))
+    my_image_pixels = my_image.load()
+
+    image_x_size = my_image.size[0]
+    image_y_size = my_image.size[1]
+
+    for x in range(image_x_size):
+        for y in range(image_y_size):
+            pixel_color = (x%256, 0, 0)
+            my_image_pixels[x,y] = pixel_color
+    print(f'saving{img_fname}')
+    my_image.save(img_fname, 'png')
+
     pass
 
 def build_image_single_red_gradient(img_fname):
@@ -137,7 +163,15 @@ def build_palette_dictionary(palette_fname):
     return the dictionary
     """
     my_palette_dict = dict()
-
+    with open (palette_fname, 'r') as in_file:
+        palette_reader = csv.reader(in_file)
+        for row in palette_reader:
+            key = int(row[0])
+            red = int(row[1])
+            green = int(row[2])
+            blue = int(row[3])
+            value = (red, green, blue)
+            my_palette_dict[key] = value
     return my_palette_dict
 
 
@@ -155,13 +189,31 @@ def build_image_using_palette(img_fname, palette_dict):
         subtract the y square from the x square then take the abs of it
         multiple the x coordinate and the y coordinate and then double it
         add those two together
-        take the square root of that.
+        take the square root of that. Make sure this is an INT
         divide it by the palette_max+1 (355 in our case) and take the remainder.
-        Make sure this is an INT
-
         This is your value
 
     Now, using the value, find the RGB color in the palette.  Set the
     pixel to that color
     """
+    my_image = Image.new('RGB', (512,512))
+    my_image_pixels = my_image.load()
+
+    image_x_size = my_image.size[0]
+    image_y_size = my_image.size[1]
+
+    for y in range(image_y_size):
+        for x in range(image_x_size):
+            x_cord_squared = x ** 2
+            y_cord_squared = y ** 2
+            abs_xsuby = abs(x_cord_squared - y_cord_squared)
+            xy_mult = (x * y) * 2
+            int_square = int(sqrt(xy_mult + abs_xsuby))
+            result = (int_square % 355)
+
+            pixel_color = palette_dict[result]
+            my_image_pixels[x,y] = pixel_color
+    print(f'saving{img_fname}')
+    my_image.save(img_fname, 'png')
+
     pass
